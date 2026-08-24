@@ -1,0 +1,110 @@
+<html>
+<head>
+<title>Student Registration Form</title>
+
+<style>
+    body{
+        font-family: Arial;
+        background: #0c0c0c;
+    }
+    form{
+        width: 400px;
+        margin: 50px auto;
+        padding: 25px;
+        background: rgb(58, 13, 13);
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgb(231, 226, 226);
+    }
+    input{
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+    }
+    button{
+        width: 100%; /* FIXED */
+        padding: 10px;
+        background: green;
+        color: white;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    button:hover{
+        background: darkgreen;
+    }
+    .error{
+        color: red;
+        font-size: 14px;
+    }
+</style>
+</head>
+
+<body>
+<form onsubmit="return validateForm()">
+    <h2>Student Registration Form</h2>
+
+    <label>First Name :</label>
+    <input type="text" id="fname">
+
+    <label>Last Name :</label>
+    <input type="text" id="lname"> <!-- FIXED id -->
+
+    <label>Roll Number :</label>
+    <input type="text" id="roll">
+
+    <label>Email ID :</label>
+    <input type="text" id="email">
+
+    <label>Password:</label>
+    <input type="password" id="pass">
+
+    <label>Confirm Password :</label>
+    <input type="password" id="cpass">
+
+    <p class="error" id="msg"></p>
+
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+function validateForm(){
+
+    // get values
+    let fname = document.getElementById("fname").value.trim();
+    let lname = document.getElementById("lname").value.trim(); // FIXED
+    let roll = document.getElementById("roll").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let pass = document.getElementById("pass").value.trim();
+    let cpass = document.getElementById("cpass").value.trim();
+
+    let msg = document.getElementById("msg");
+
+    // Email pattern
+    let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // check mandatory fields
+    if (fname === "" || lname === "" || roll === "" || email === "" || pass === "" || cpass === "") {
+        msg.innerHTML = "All fields are mandatory!";
+        return false;
+    }
+
+    // Validate email format
+    if (!emailPattern.test(email)) { // FIXED condition
+        msg.innerHTML = "Please enter a valid email address!";
+        return false;
+    }
+
+    // password match validation
+    if (pass !== cpass) {
+        msg.innerHTML = "Password and Confirm Password must be the same!";
+        return false;
+    }
+
+    // success
+    alert("✅ Form submitted successfully!");
+    return true;
+}
+</script>
+
+</body>
+</html>
