@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARK OS | Tactical Typing Interface</title>
+    <style>
+        :root {
+            --iron-red: #ff0000;
+            --arc-cyan: #00f2ff;
+            --gold: #ffcc00;
+            --bg-dark: #080a0c;
+            --glass: rgba(0, 242, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--arc-cyan);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        /* Scanline HUD Effect */
+        body::before {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        #hud-frame {
+            width: 80%;
+            max-width: 900px;
+            padding: 40px;
+            border: 2px solid var(--arc-cyan);
+            background: var(--glass);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 20px rgba(0, 242, 255, 0.1);
+            position: relative;
+            backdrop-filter: blur(4px);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--arc-cyan);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .header span { color: var(--iron-red); }
+
+        #stats-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .stat-box { border-left: 3px solid var(--gold); padding-left: 10px; }
+        .stat-value { color: #fff; text-shadow: 0 0 10px var(--arc-cyan); }
+
+        #typing-area {
+            position: relative;
+            font-size: 24px;
+            line-height: 1.5;
+            height: 150px;
+            overflow: hidden;
+            color: rgba(0, 242, 255, 0.3);
+        }
+
+        .word { display: inline-block; margin-right: 12px; position: relative; }
+        .letter.correct { color: var(--arc-cyan); text-shadow: 0 0 5px var(--arc-cyan); }
+        .letter.incorrect { color: var(--iron-red); border-bottom: 2px solid var(--iron-red); }
+
+        #caret {
+            position: absolute;
+            width: 2px;
+            height: 28px;
+            background: var(--gold);
+            box-shadow: 0 0 10px var(--gold);
+            transition: all 0.1s ease;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        #restart-btn {
+            margin-top: 30px;
+            background: none;
+            border: 1px solid var(--iron-red);
+            color: var(--iron-red);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        #restart-btn:hover {
+            background: var(--iron-red);
+            color: white;
+            box-shadow: 0 0 15px var(--iron-red);
+        }
+    </style>
+</head>
+<body>
+
+<div id="hud-frame">
+    <div class="header">
+        <div>STARK INDUSTRIES // <span>MARK LXXXV</span></div>
+        <div>THREAT LEVEL: LOW</div>
+    </div>
+
+    <div id="stats-row">
+        <div class="stat-box">WPM: <span id="wpm" class="stat-value">0</span></div>
+        <div class="stat-box">ACCURACY: <span id="acc" class="stat-value">100</span>%</div>
+        <div class="stat-box">TIMER: <span id="timer" class="stat-value">30</span>s</div>
+    </div>
+
+    <div id="typing-area">
+        <div id="caret"></div>
+        <div id="words-container"></div>
+    </div>
+
+    <button id="restart-btn" onclick="resetGame()">INITIATE REBOOT</button>
+</div>
+
+<script>
+    const wordsRaw = "tony stark iron man jarvis friday ultron avengers shield reactor armor flight repulsor laser suit billionaire genius playboy philanthropist endgame gauntlet nano tech legacy pepper pots morgan happy hogan";
+    const wordsArray = wordsRaw.split(' ');
+    let currentWordIndex = 0;
+    let currentLetterIndex = 0;
+    let startTime = null;
+    let timer = 100;
+    let interval = null;
+    let mistakes = 0;
+    let totalTyped = 0;
+
+    const container = document.getElementById('words-container');
+    const caret = document.getElementById('caret');
+    const wpmDisplay = document.getElementById('wpm');
+    const accDisplay = document.getElementById('acc');
+    const timerDisplay = document.getElementById('timer');
+
+    function init() {
+        container.innerHTML = '';
+        // Shuffle and pick 40 words
+        const gameWords = [...wordsArray].sort(() => Math.random() - 0.5).slice(0, 40);
+        gameWords.forEach(word => {
+            const wordDiv = document.createElement('div');
+            wordDiv.className = 'word';
+            word.split('').forEach(char => {
+                const span = document.createElement('span');
+                span.className = 'letter';
+                span.innerText = char;
+                wordDiv.appendChild(span);
+            });
+            container.appendChild(wordDiv);
+        });
+        updateCaret();
+    }
+
+    function updateCaret() {
+        const activeWord = container.children[currentWordIndex];
+        const activeLetter = activeWord.children[currentLetterIndex] || activeWord.lastElementChild;
+        const rect = activeLetter.getBoundingClientRect();
+        const contRect = container.getBoundingClientRect();
+
+        caret.style.top = (rect.top - contRect.top) + 'px';
+        caret.style.left = (currentLetterIndex >= activeWord.children.length ? rect.right - contRect.left : rect.left - contRect.left) + 'px';
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (timer <= 0 || e.key === 'Shift' || e.key === 'Alt' || e.key === 'Control') return;
+
+        if (!startTime) {
+            startTime = Date.now();
+            interval = setInterval(() => {
+                timer--;
+                timerDisplay.innerText = timer;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    finishGame();
+                }
+            }, 1000);
+        }
+
+        const activeWord = container.children[currentWordIndex];
+        const letters = activeWord.children;
+
+        // Handle Backspace
+        if (e.key === 'Backspace') {
+            if (currentLetterIndex > 0) {
+                currentLetterIndex--;
+                letters[currentLetterIndex].classList.remove('correct', 'incorrect');
+            }
+            updateCaret();
+            return;
+        }
+
+        // Handle Typing
+        if (e.key === ' ' && currentLetterIndex >= letters.length) {
+            currentWordIndex++;
+            currentLetterIndex = 0;
+        } else if (e.key.length === 1) {
+            totalTyped++;
+            if (e.key === letters[currentLetterIndex]?.innerText) {
+                letters[currentLetterIndex].classList.add('correct');
+            } else if (letters[currentLetterIndex]) {
+                letters[currentLetterIndex].classList.add('incorrect');
+                mistakes++;
+            }
+            currentLetterIndex++;
+        }
+
+        // Real-time Stats
+        const elapsedMin = (Date.now() - startTime) / 60000;
+        const correctOnes = document.querySelectorAll('.correct').length;
+        wpmDisplay.innerText = Math.round((correctOnes / 5) / elapsedMin) || 0;
+        accDisplay.innerText = Math.round(((totalTyped - mistakes) / totalTyped) * 100) || 100;
+
+        updateCaret();
+    });
+
+    function finishGame() {
+        alert(`MISSION COMPLETE\nFinal WPM: ${wpmDisplay.innerText}\nAccuracy: ${accDisplay.innerText}%`);
+    }
+
+    function resetGame() {
+        location.reload();
+    }
+
+    init();
+</script>
+
+</body>
+</html>

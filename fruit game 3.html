@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JS Fruit Slasher</title>
+    <style>
+        body { margin: 0; background: #222; overflow: hidden; font-family: sans-serif; }
+        canvas { display: block; cursor: crosshair; }
+        #ui { position: absolute; top: 20px; left: 20px; color: white; font-size: 24px; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="ui">Score: <span id="score">0</span></div>
+    <canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let score = 0;
+let fruits = [];
+let particles = [];
+let mousePath = [];
+
+class Fruit {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 50;
+        this.radius = 30 + Math.random() * 20;
+        this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        this.speedY = -7 - Math.random() * 10;
+        this.speedX = (Math.random() - 0.3) * 2;
+        this.gravity = 0.25;
+        this.sliced = false;
+    }
+
+    update() {
+        this.y += this.speedY;
+        this.x += this.speedX;
+        this.speedY += this.gravity;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
+function createParticles(x, y, color) {
+    for (let i = 0; i < 10; i++) {
+        particles.push({
+            x, y,
+            vx: (Math.random() - 0.5) * 10,
+            vy: (Math.random() - 0.5) * 10,
+            life: 1.0,
+            color
+        });
+    }
+}
+
+function handleInput(ex, ey) {
+    mousePath.push({x: ex, y: ey});
+    if (mousePath.length > 10) mousePath.shift();
+
+    fruits.forEach((fruit, index) => {
+        const dist = Math.hypot(fruit.x - ex, fruit.y - ey);
+        if (dist < fruit.radius && !fruit.sliced) {
+            fruit.sliced = true;
+            score += 10;
+            scoreEl.innerText = score;
+            createParticles(fruit.x, fruit.y, fruit.color);
+            fruits.splice(index, 1);
+        }
+    });
+}
+
+canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
+
+function animate() {
+    ctx.fillStyle = 'rgba(34, 34, 34, 0.3)'; // Trail effect
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Spawn fruits
+    if (Math.random() < 0.03) fruits.push(new Fruit());
+
+    // Update/Draw Fruits
+    fruits.forEach((fruit, i) => {
+        fruit.update();
+        fruit.draw();
+        if (fruit.y > canvas.height + 100) fruits.splice(i, 1);
+    });
+
+    // Draw Particles
+    particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.fillRect(p.x, p.y, 4, 4);
+        if (p.life <= 0) particles.splice(i, 1);
+    });
+    ctx.globalAlpha = 1;
+
+    // Draw Blade Trail
+    if (mousePath.length > 2) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 3;
+        ctx.moveTo(mousePath[0].x, mousePath[0].y);
+        for(let i = 1; i < mousePath.length; i++) {
+            ctx.lineTo(mousePath[i].x, mousePath[i].y);
+        }
+        ctx.stroke();
+    }
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Fruit Cutting Game</title>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: Arial;
+        background: #222;
+        color: white;
+        text-align: center;
+      }
+
+      #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 24px;
+      }
+
+      .fruit {
+        position: absolute;
+        font-size: 40px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="score">Score: 0</div>
+
+    <script>
+      let score = 0;
+
+      const fruits = ["🍎", "🍊", "🍉", "🍓", "🍍", "🍒"];
+
+      function createFruit() {
+        const fruit = document.createElement("div");
+        fruit.classList.add("fruit");
+
+        fruit.innerText = fruits[Math.floor(Math.random() * fruits.length)];
+
+        fruit.style.left = Math.random() * window.innerWidth + "px";
+        fruit.style.top = "-50px";
+
+        document.body.appendChild(fruit);
+
+        let fall = setInterval(() => {
+          let top = parseInt(fruit.style.top);
+          fruit.style.top = top + 5 + "px";
+
+          if (top > window.innerHeight) {
+            fruit.remove();
+            clearInterval(fall);
+          }
+        }, 30);
+
+        fruit.onclick = function () {
+          score++;
+          document.getElementById("score").innerText = "Score: " + score;
+
+          fruit.innerText = "💥";
+
+          setTimeout(() => {
+            fruit.remove();
+          }, 200);
+
+          clearInterval(fall);
+        };
+      }
+
+      setInterval(createFruit, 1000);
+    </script>
+  </body>
+</html>

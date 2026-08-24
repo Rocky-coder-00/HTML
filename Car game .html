@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Car Game</title>
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+background:#333;
+}
+
+#game{
+width:400px;
+height:600px;
+background:#555;
+margin:auto;
+position:relative;
+overflow:hidden;
+border-left:5px solid white;
+border-right:5px solid white;
+}
+
+/* Road lines */
+
+.line{
+width:10px;
+height:100px;
+background:white;
+position:absolute;
+left:195px;
+animation:road 1s linear infinite;
+}
+
+@keyframes road{
+0%{top:-100px;}
+100%{top:600px;}
+}
+
+/* Player car */
+
+#car{
+width:50px;
+height:90px;
+background:red;
+position:absolute;
+bottom:20px;
+left:175px;
+border-radius:10px;
+}
+
+/* Enemy car */
+
+.enemy{
+width:50px;
+height:90px;
+background:black;
+position:absolute;
+top:-100px;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<div class="line"></div>
+
+<div id="car"></div>
+
+<div class="enemy" id="enemy"></div>
+
+</div>
+
+<script>
+
+let car = document.getElementById("car");
+let enemy = document.getElementById("enemy");
+
+let carX = 175;
+
+document.addEventListener("keydown", function(e){
+
+if(e.key==="ArrowLeft" && carX>0){
+carX -= 20;
+}
+
+if(e.key==="ArrowRight" && carX<350){
+carX += 20;
+}
+
+car.style.left = carX + "px";
+
+});
+
+let enemyY = -100;
+let enemyX = Math.random()*350;
+
+function moveEnemy(){
+
+enemyY += 5;
+
+if(enemyY > 600){
+enemyY = -100;
+enemyX = Math.random()*350;
+}
+
+enemy.style.top = enemyY + "px";
+enemy.style.left = enemyX + "px";
+
+/* collision */
+
+let carRect = car.getBoundingClientRect();
+let enemyRect = enemy.getBoundingClientRect();
+
+if(
+carRect.left < enemyRect.right &&
+carRect.right > enemyRect.left &&
+carRect.top < enemyRect.bottom &&
+carRect.bottom > enemyRect.top
+){
+alert("Game Over!");
+location.reload();
+}
+
+requestAnimationFrame(moveEnemy);
+
+}
+
+moveEnemy();
+
+</script>
+
+</body>
+</html>
