@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Pass Official Portal</title>
+    <style>
+        /* General Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background-color 0.5s ease;
+        }
+
+        /* Login Page Styles */
+        #login-page {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 320px;
+        }
+
+        h2 { color: #333; margin-bottom: 20px; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box; /* Keeps padding from breaking width */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        button:hover { background-color: #0056b3; }
+
+        /* Warning Page Styles (Hidden by default) */
+        #warning-page {
+            display: none;
+            text-align: center;
+            color: #ff4d4d;
+        }
+
+        .error-box {
+            border: 5px solid #ff4d4d;
+            padding: 50px;
+            background: rgba(0,0,0,0.9);
+            border-radius: 20px;
+            animation: shake 0.2s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(-1deg); }
+            40% { transform: translate(3px, 2px) rotate(1deg); }
+            60% { transform: translate(1px, -1px) rotate(1deg); }
+            80% { transform: translate(-1px, 2px) rotate(-1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+    </style>
+</head>
+<body id="main-body">
+
+    <div id="login-page">
+        <h2> TIME PASS LOGIN</h2>
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="number" id="age" placeholder="Age" required>
+        <input type="tel" id="phone" placeholder="Phone Number" required>
+        <button onclick="showWarning()">LOGIN</button>
+    </div>
+
+    <div id="warning-page">
+        <div class="error-box">
+            <h1>⚠️ CRITICAL SYSTEM FAILURE ⚠️</h1>
+            <p style="font-size: 24px;"><strong>ERROR: HARDWARE INCOMPATIBLE</strong></p>
+            <p>Your current phone or laptop cannot handle the processing power required for this website.</p>
+            <p>PLEASE SHUT DOWN IMMEDIATELY TO PREVENT OVERHEATING.</p>
+        </div>
+    </div>
+
+    <script>
+        function showWarning() {
+            // Get values (optional: you can use these if you want to personalize the error)
+            const name = document.getElementById('name').value;
+            
+            if(!name) {
+                alert("Please fill out the form first!");
+                return;
+            }
+
+            // Hide Login, Show Warning
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('warning-page').style.display = 'block';
+            
+            // Change background to black for dramatic effect
+            document.getElementById('main-body').style.backgroundColor = '#000';
+        }
+    </script>
+
+</body>
+</html>

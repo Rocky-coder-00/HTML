@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Unique Login Page</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(270deg, #ff6ec4, #7873f5, #4ADEDE);
+  background-size: 600% 600%;
+  animation: gradientBG 10s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.login-box {
+  width: 320px;
+  padding: 40px;
+  border-radius: 15px;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.1);
+  box-shadow: 0 0 25px rgba(0,0,0,0.2);
+  color: white;
+  text-align: center;
+}
+
+.login-box h2 {
+  margin-bottom: 30px;
+}
+
+.input-box {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid white;
+  outline: none;
+  color: white;
+  font-size: 16px;
+}
+
+.input-box label {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  color: white;
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+.input-box input:focus ~ label,
+.input-box input:valid ~ label {
+  top: -10px;
+  font-size: 12px;
+  color: #4ADEDE;
+}
+
+.toggle-pass {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 25px;
+  background: #4ADEDE;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #fff;
+}
+
+.extra {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.extra a {
+  color: #4ADEDE;
+  text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <h2>Login</h2>
+
+  <div class="input-box">
+    <input type="text" required>
+    <label>Username</label>
+  </div>
+
+  <div class="input-box">
+    <input type="password" id="password" required>
+    <label>Password</label>
+    <span class="toggle-pass" onclick="togglePassword()">👁</span>
+  </div>
+
+  <button onclick="login()">Sign In</button>
+
+  <div class="extra">
+    <p>Forgot Password?</p>
+    <p>Don't have an account? <a href="#">Register</a></p>
+  </div>
+</div>
+
+<script>
+function togglePassword() {
+  const pass = document.getElementById("password");
+  pass.type = pass.type === "password" ? "text" : "password";
+}
+
+function login() {
+  alert("Login button clicked!");
+}
+</script>
+
+</body>
+</html>
